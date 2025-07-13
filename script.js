@@ -6,7 +6,7 @@
   <style>
     body {
       font-family: sans-serif;
-      background-color: #f3f3f3;
+      background-color: #fff0f5;
       padding: 20px;
     }
     .grid {
@@ -15,7 +15,7 @@
       overflow-x: auto;
     }
     .semester {
-      background: white;
+      background: #fff;
       padding: 10px;
       border-radius: 10px;
       box-shadow: 0 0 5px rgba(0,0,0,0.1);
@@ -25,29 +25,26 @@
       text-align: center;
     }
     .course {
-      background: #eee;
+      background: #d0ebff; /* celeste pastel por defecto */
       padding: 5px;
       border-radius: 5px;
       margin: 5px 0;
       cursor: pointer;
       transition: background 0.2s;
     }
-    .course:hover {
-      background: #cce5ff;
+    .course.aprobado {
+      background: #e6ccff !important; /* morado pastel */
     }
-    .unlocked {
-      background: #d4edda !important;
-    }
-    .locked {
-      opacity: 0.5;
+    .course.desbloqueado {
+      background: #ffd6e8 !important; /* rosita pastel */
     }
   </style>
 </head>
 <body>
   <h1>Malla Interactiva Química y Farmacia - UCN</h1>
-  <p>Haz clic en un ramo para ver cuáles desbloquea.</p>
+  <p>Haz <strong>clic</strong> en los ramos que ya aprobaste. Se marcarán en morado 💜 y desbloquearán los que puedes tomar 🌸.</p>
   <div class="grid" id="malla"></div>  <script>
-    const courses = {
+    const cursos = {
       'Anatomía': ['Biología'],
       'Introducción a la Farmacia I': ['Introducción a la Farmacia II'],
       'Álgebra': ['Cálculo'],
@@ -89,7 +86,7 @@
       'Unidad de Investigación I': ['Unidad de Investigación II']
     };
 
-    const semesters = [
+    const semestres = [
       ['Anatomía', 'Introducción a la Farmacia I', 'Álgebra', 'Inglés 1', 'Química General I', 'Introducción al Método Científico', 'Identidad, Univ. y Eq. de Género'],
       ['Biología', 'Introducción a la Farmacia II', 'Cálculo', 'Inglés 2', 'Química General II', 'Biofísica'],
       ['Fisiopatología I', 'Fisicoquímica Farmacéutica', 'Química Farmacéutica Org. I', 'Ser humano', 'Acondicionamiento Físico', 'Comunicación y desarrollo personal', 'Formación General Glob.'],
@@ -103,33 +100,58 @@
     ];
 
     const malla = document.getElementById('malla');
+    const cursoDivs = {};
+    const aprobados = new Set();
 
-    semesters.forEach((sem, index) => {
+    function actualizarEstados() {
+      // Resetear todos
+      for (const div of Object.values(cursoDivs)) {
+        div.classList.remove('aprobado', 'desbloqueado');
+        div.style.background = '#d0ebff'; // celeste pastel default
+      }
+
+      // Marcar aprobados
+      for (const name of aprobados) {
+        if (cursoDivs[name]) {
+          cursoDivs[name].classList.add('aprobado');
+        }
+      }
+
+      // Marcar desbloqueados
+      for (const name of aprobados) {
+        const desbloquea = cursos[name] || [];
+        desbloquea.forEach(d => {
+          if (!aprobados.has(d) && cursoDivs[d]) {
+            cursoDivs[d].classList.add('desbloqueado');
+          }
+        });
+      }
+    }
+
+    semestres.forEach((sem, index) => {
       const semDiv = document.createElement('div');
       semDiv.className = 'semester';
       semDiv.innerHTML = `<h3>Semestre ${index + 1}</h3>`;
 
-      sem.forEach(course => {
+      sem.forEach(curso => {
         const div = document.createElement('div');
         div.className = 'course';
-        div.innerText = course;
-        div.onclick = () => unlock(course);
+        div.innerText = curso;
+        div.onclick = () => {
+          if (aprobados.has(curso)) {
+            aprobados.delete(curso);
+          } else {
+            aprobados.add(curso);
+          }
+          actualizarEstados();
+        };
+        cursoDivs[curso] = div;
         semDiv.appendChild(div);
       });
 
       malla.appendChild(semDiv);
     });
 
-    function unlock(courseName) {
-      document.querySelectorAll('.course').forEach(c => c.classList.remove('unlocked'));
-      const unlocked = courses[courseName] || [];
-      unlocked.forEach(name => {
-        document.querySelectorAll('.course').forEach(div => {
-          if (div.innerText === name) {
-            div.classList.add('unlocked');
-          }
-        });
-      });
-    }
+    actualizarEstados();
   </script></body>
 </html>
