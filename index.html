@@ -1,1 +1,135 @@
-index.html
+<!DOCTYPE html><html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Malla Interactiva - Química y Farmacia UCN</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #f4f4f4;
+      padding: 20px;
+    }
+    .container {
+      display: flex;
+      overflow-x: auto;
+    }
+    .semestre {
+      min-width: 200px;
+      margin-right: 20px;
+    }
+    .semestre h3 {
+      text-align: center;
+      background: #4CAF50;
+      color: white;
+      padding: 5px;
+      border-radius: 5px;
+    }
+    .ramo {
+      background: white;
+      border: 1px solid #ccc;
+      padding: 8px;
+      margin: 6px 0;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .ramo:hover {
+      background: #e0f7fa;
+    }
+    .activo {
+      background: #b2dfdb !important;
+      border-color: #00796b;
+    }
+  </style>
+</head>
+<body>
+  <h1>Malla Interactiva - Química y Farmacia</h1>
+  <p>Haz clic en un ramo para ver cuáles desbloquea.</p>
+  <div class="container" id="malla"></div>  <script>
+    const ramos = {
+      "Anatomía": ["Biología"],
+      "Introducción a la Farmacia I": ["Introducción a la Farmacia II"],
+      "Álgebra": ["Cálculo"],
+      "Inglés 1": ["Inglés 2"],
+      "Química General I": ["Química y Farmacia II"],
+      "Biología": ["Fisiopatología I"],
+      "Inglés 2": ["Inglés 3"],
+      "Química y Farmacia II": ["Fisicoquímica Farmacéutica", "Química Orgánica I"],
+      "Biofísica": ["Fisiopatología II"],
+      "Fisiopatología I": ["Fisiopatología II", "Inmunología"],
+      "Fisicoquímica Farmacéutica": ["Bioquímica"],
+      "Química Orgánica I": ["Química Farmacéutica Org. II"],
+      "Fisiopatología II": ["Microbiología"],
+      "Analítica Farmacéutica": ["Taller Literatura Científica"],
+      "Química Farmacéutica Org. II": ["Farmacología I"],
+      "Bioquímica": ["Química Funcional"],
+      "Inmunología": ["Microbiología"],
+      "Taller Literatura Científica": ["Marketing Farmacéutico"],
+      "Microbiología": ["Bioquímica Clínica"],
+      "Química Funcional": ["Farmacoquímica II"],
+      "Análisis Farmacéutico Instrume.": ["Tecnología Farmacéutica I"],
+      "Farmacología I": ["Farmacología II"],
+      "Bioquímica Clínica": ["Farmacia Asistencial"],
+      "Tecnología Farmacéutica I": ["Tecnología Farmacéutica II"],
+      "Farmacología II": ["Atención Farmacéutica", "Bioestadística"],
+      "Marketing Farmacéutico": ["Biofarmacia"],
+      "Farmacoquímica I": ["Farmacoquímica II"],
+      "Farmacia Asistencial": ["Legislación Farmacéutica"],
+      "Tecnología Farmacéutica II": ["Farmacia Clínica"],
+      "Atención Farmacéutica": ["Farmacia Asistencial"],
+      "Biofarmacia": ["Farmacología"],
+      "Integrador I: Taller de Empre.": ["Integrador II: Taller C.C."],
+      "Farmacia Clínica": ["Toxicología"],
+      "Taller Farmacia Asistencial": ["Unidad de Investigación I"],
+      "Farmacología": ["Toxicología"],
+      "Integrador II: Taller C.C.": ["Integrador III: taller Atención."],
+      "Internado Farmacia Clínica": ["Unidad de Investigación II"],
+      "Integrador III: taller Atención.": ["Unidad de Investigación II"],
+      "Toxicología": ["Unidad de Investigación II"],
+      "Unidad de Investigación I": ["Unidad de Investigación II"]
+    };
+
+    const semestres = [
+      ["Anatomía", "Introducción a la Farmacia I", "Álgebra", "Inglés 1", "Química General I", "Introducción al Método Científico", "Identidad, Univ. y Eq. de Género"],
+      ["Biología", "Introducción a la Farmacia II", "Cálculo", "Inglés 2", "Química y Farmacia II", "Biofísica"],
+      ["Fisiopatología I", "Fisicoquímica Farmacéutica", "Química Orgánica I", "Ser humano", "Acondicionamiento Físico", "Comunicación y desarrollo personal", "Formación General Glob."],
+      ["Fisiopatología II", "Formación Teológico", "Analítica Farmacéutica", "Química Farmacéutica Org. II", "Bioquímica", "Formación General Glob.", "Inmunología"],
+      ["Taller Literatura Científica", "Microbiología", "Química Funcional", "Análisis Farmacéutico Instrume.", "Farmacología I", "Adm. Y Gestión en Farmacia"],
+      ["Bioquímica Clínica", "Tecnología Farmacéutica I", "Farmacología II", "Formación Profesional Electiva", "Marketing Farmacéutico", "Farmacoquímica I"],
+      ["Farmacoquímica II", "Farmacia Asistencial", "Tecnología Farmacéutica II", "Atención Farmacéutica", "Biofarmacia", "Integrador I: Taller de Empre."],
+      ["Farmacia Clínica", "Bioestadística", "Legislación Farmacéutica", "Formación Profesional Electiva", "Taller Farmacia Asistencial", "Farmacología", "Integrador II: Taller C.C."],
+      ["Formación General Electiva", "Internado Farmacia Clínica", "Formación General Teológica", "Integrador III: taller Atención.", "Toxicología", "Unidad de Investigación I"],
+      ["Unidad de Investigación II"]
+    ];
+
+    const container = document.getElementById("malla");
+
+    semestres.forEach((ramosSem, index) => {
+      const col = document.createElement("div");
+      col.classList.add("semestre");
+
+      const title = document.createElement("h3");
+      title.textContent = `Semestre ${index + 1}`;
+      col.appendChild(title);
+
+      ramosSem.forEach(nombre => {
+        const div = document.createElement("div");
+        div.textContent = nombre;
+        div.classList.add("ramo");
+        div.setAttribute("data-nombre", nombre);
+        div.onclick = () => seleccionarRamo(nombre);
+        col.appendChild(div);
+      });
+
+      container.appendChild(col);
+    });
+
+    function seleccionarRamo(nombre) {
+      document.querySelectorAll(".ramo").forEach(r => r.classList.remove("activo"));
+      const dependientes = ramos[nombre] || [];
+      dependientes.forEach(dep => {
+        const el = document.querySelector(`.ramo[data-nombre='${dep}']`);
+        if (el) el.classList.add("activo");
+      });
+    }
+  </script></body>
+</html>
